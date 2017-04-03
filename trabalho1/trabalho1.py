@@ -2,21 +2,25 @@ from scipy import misc
 from scipy import ndimage
 import numpy as np
 import matplotlib.pyplot as plt
+import math
+import cv2
+
+img_peppers = misc.imread('peppers.png')
+img_baboon = misc.imread('baboon.png')
 
 
-img = misc.imread('peppers.png')
+def bin(img, m, n):
+	r = np.zeros((256))
+	g = np.zeros((256))
+	b = np.zeros((256))
 
-
-
-
-def bin(img, m, n, canal):
-	count = 0
-	vet_bin = np.zeros((256))
 	for i in range (m):
 		for j in range (n):
-			vet_bin[img[i][j][canal]] = vet_bin[img[i][j][canal]] + 1
-			count = count + 1
-	return vet_bin
+			r[img[i][j][0]] = r[img[i][j][0]] + 1
+			g[img[i][j][1]] = g[img[i][j][1]] + 1
+			b[img[i][j][2]] = b[img[i][j][2]] + 1
+
+	return r, g, b
 
 
 def hist(vet):
@@ -29,25 +33,68 @@ def hist(vet):
 	plt.show()
 
 
-def escala_bin (vet, num_bin):
+def escala_bin (r_old, g_old, b_old, num_bin):
 	bins = 256/num_bin
-	reescala = np.zeros(num_bin)
-
-	for i in range (len(reescala)):
+	r_new = np.zeros(num_bin)
+	g_new = np.zeros(num_bin)
+	b_new = np.zeros(num_bin)
+	for i in range (len(r_new)):
 		k = 0
 		while (k < bins):
-			reescala[i] = reescala[i] + vet[bins*i + k]
+			r_new[i] = r_new[i] + r_old[bins*i + k]
+			g_new[i] = g_new[i] + g_old[bins*i + k]
+			b_new[i] = b_new[i] + b_old[bins*i + k]
 			k = k + 1
 
-	return reescala
+	return r_new, g_new, b_new
 
 
-tam = img.shape
-m = tam[0]
-n = tam[1]
+def dist_euclidiana(hist1, hist2):
 
-vet = bin(img, m, n, 0)
-print vet[0:8]
-vet2 = escala_bin(vet, 4)
-print vet2
-hist(vet2)
+	soma = 0; 
+	tam = len(hist1)
+	for i in range (tam):
+		soma = soma + ((hist1[i]- hist2[i])**2)
+
+
+	return math.sqrt(soma)
+
+tam_peppers = img_peppers.shape
+m_peppers = tam_peppers[0]
+n_peppers = tam_peppers[1]
+
+tam_baboon = img_baboon.shape
+m_baboon = tam_baboon[0]
+n_baboon = tam_baboon[1]
+
+
+num_pixels_baboon = m_baboon*n_baboon
+num_pixels_peppers = m_peppers*n_peppers
+
+r_baboon, g_baboon, b_baboon = bin(img_baboon, m_baboon, n_baboon)
+r_peppers, g_peppers, b_peppers= bin(img_peppers, m_peppers, n_peppers)
+
+r_peppers_n, g_peppers_n, b_peppers_n = escala_bin(r_peppers, g_peppers, b_peppers, 256)
+r_baboon_n, g_baboon_n, b_baboon_n = escala_bin(r_baboon, g_baboon, b_baboon, 256)
+
+
+r_peppers_n = r_peppers_n/num_pixels_peppers
+g_peppers_n = g_peppers_n/num_pixels_peppers
+b_peppers_n = b_peppers_n/num_pixels_peppers
+
+
+r_baboon_n = r_baboon_n/num_pixels_baboon
+g_baboon_n = g_baboon_n/num_pixels_baboon
+b_baboon_n = b_baboon_n/num_pixels_baboon
+
+dist_r = dist_euclidiana(r_peppers_n, r_baboon_n)
+dist_g = dist_euclidiana(g_peppers_n, g_baboon_n)
+dist_b = dist_euclidiana(b_peppers_n, b_baboon_n)
+
+dist_total = (dist_r + dist_g + dist_b)/3
+
+
+
+gray_image = cv2.cvtColor(img_peppers, cv2.COLOR_BGR2GRAY)
+print gray_image.shape
+print gray_image
