@@ -1,3 +1,12 @@
+#
+# Nome: Francisco Rafael Capiteli Carneiro
+# RA: 157888	
+# Trabalho 1 - MC920 - Introdução ao Processamento e Análise de Imagens
+#
+#
+#
+#
+#
 from scipy import misc
 from scipy import ndimage
 import numpy as np
@@ -5,6 +14,8 @@ import matplotlib.pyplot as plt
 import math
 import cv2
 
+
+#FUNÇÕCES JA EXPLICADAS NO RELATÓRIO
 def bin_image(img, m, n):
 	r = np.zeros((256))
 	g = np.zeros((256))
