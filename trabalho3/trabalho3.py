@@ -30,13 +30,7 @@ def compress(image, k):
 
 def rmse_images(image, new_image): 
 
-	dif = np.count_nonzero((image - new_image)**2)
-	m = image.shape[0]
-	n = image.shape[1]
-	mean = np.float(dif)/np.float(m*n)
-	rmse = np.sqrt(mean)
-
-	#rmse = np.sqrt(np.mean((image-new_image)**2))
+	rmse = np.sqrt(np.mean((image-new_image)**2))
 	return rmse
 
 def plot_ (x, rmse, ratio, nome): 
